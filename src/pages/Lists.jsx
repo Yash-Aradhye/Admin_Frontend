@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import Navbar from '../components/Navbar'
 import ListsManagement from '../components/lists/ListsManagement'
 import { Menu } from 'lucide-react'
+import ListsManagement2 from '../components/lists/ListsManagement2'
 
 const Lists = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -27,7 +28,7 @@ const Lists = () => {
 
       {/* Main content */}
       <div className="flex-1 overflow-auto w-full">
-        <ListsManagement />
+        <ListsManagement2 />
       </div>
     </div>
   )

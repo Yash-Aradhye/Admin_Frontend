@@ -1,84 +1,211 @@
-import { useState } from 'react';
-import './App.css';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Colleges from './pages/Colleges';
-import Login from './pages/Login';
-import ChangePassword from './pages/ChangePassword';
-import Users from './pages/Users';
-import Forms from './pages/Forms';
-import Lists from './pages/Lists';
-
-// Protected Route component to handle authentication
-const ProtectedRoute = ({ children }) => {
-  const token = localStorage.getItem('adminToken');
-  
-  if (!token) {
-    // Redirect to login if no token exists
-    return <Navigate to="/" replace />;
-  }
-
-  return children;
-};
+import { useState } from "react";
+import "./App.css";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import Colleges from "./pages/Colleges";
+import Login from "./pages/Login";
+import ChangePassword from "./pages/ChangePassword";
+import Users from "./pages/Users";
+import Forms from "./pages/Forms";
+import Lists from "./pages/Lists";
+import { UsersProvider } from "./contexts/UsersContext";
+import Analytics from "./pages/Analytics";
+import DataCollectionForms from "./pages/DataCollectionForms";
+import CutOff from "./pages/CutOff";
+import UserDetailsPage from "./pages/UserDetailsPage";
+import AddUsers from "./pages/AddUsers";
+import AdminSettings from "./pages/AdminSettings";
+import ProtectedRoute from './components/ProtectedRoute';
+import Unauthorized from './pages/Unauthorized';
+import LandingPage from "./pages/LandingPage";
+import StaticPagesManagement from "./pages/StaticPagesManagement";
+import PremiumPageManagement from "./pages/PremiumPageManagement";
+import PaymentLogs from "./pages/PaymentLogs";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import OrdersCheck from "./pages/OrdersCheck";
+import UserDetailsByPhone from "./pages/UsersDetailsPhone";
+import { PremiumPageProvider } from "./contexts/PremiumPageContext";
+import Appointments from "./pages/Appointments";
+import { AnalyticsProvider } from "./contexts/analyticsContext";
+import PremiumUsers from "./pages/PremiumUsers";
+import SendPushNotification from "./pages/SendPushNotification";
+import FormProgressTracking from "./pages/FormProgressTracking";
+import UserLists from "./pages/UserLists";
+import UserListsPage from "./pages/UserListsPage";
+import { ListsProvider } from "./contexts/ListsContext";
+import Lists2 from "./pages/Lists2";
+import UsersLists from "./pages/UserLists";
 
 function App() {
   return (
     <>
-      <BrowserRouter>
-        <Routes>
-          {/* Login route */}
-          <Route path='/' element={<Login />} />
-          
-          {/* Protected routes */}
-          <Route 
+    {/* Add ToastContainer for react-toastify */}
+      <ToastContainer
+        position="top-right"
+        autoClose={1500}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+    <BrowserRouter>
+         <UsersProvider>
+          <AnalyticsProvider>
+            <PremiumPageProvider>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/home" element={
+            <Analytics />
+        } />
+        <Route path="/form-progress" element={
+            <FormProgressTracking />
+        } />
+         <Route 
             path='/colleges' 
             element={
-              <ProtectedRoute>
+              <ProtectedRoute requiredPermission={"colleges"}>
                 <Colleges />
               </ProtectedRoute>
             }
           />
-          
-          <Route 
-            path='/users' 
-            element={
-              <ProtectedRoute>
-                <Users/>
-              </ProtectedRoute>
-            }
-          />
+        <Route path="/users" element={
+          <ProtectedRoute requiredPermission="users">
+            
+              <Users />
+              
+          </ProtectedRoute>
+        } />
+        <Route path="/users/lists/:id" element={
+          <ProtectedRoute requiredPermission="users">
+            
+              <UsersLists />
+              
+          </ProtectedRoute>
+        } />
+        <Route path="/users/lists/:id/:listId" element={
+          <ProtectedRoute requiredPermission="users">
+            
+              <UsersLists />
+              
+          </ProtectedRoute>
+        } />
+        <Route path="/premium-users" element={
+          <ProtectedRoute requiredPermission="users">
+              <PremiumUsers />
+              
+          </ProtectedRoute>
+        } />
+        <Route path="/users/:id" element={
+          <ProtectedRoute requiredPermission="users">
+              <UserDetailsPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/user-lists" element={
+          <ProtectedRoute requiredPermission="users">
+            <UserLists />
+          </ProtectedRoute>
+        } />
 
-          <Route 
-            path='/forms' 
-            element={
-              <ProtectedRoute>
-                <Forms/>
-              </ProtectedRoute>
-            }
-          />
-
-          <Route 
-            path='/lists' 
-            element={
-              <ProtectedRoute>
-                <Lists />
-              </ProtectedRoute>
-            }
-          />
-          
-          <Route 
-            path='/change-password' 
-            element={
-              <ProtectedRoute>
-                <ChangePassword />
-              </ProtectedRoute>
-            }
-          />
-          
-          {/* Catch all - redirect to login */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
+        <Route path="/user-lists/:userId" element={
+          <ProtectedRoute requiredPermission="users">
+            <UserListsPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/users/phone/:id" element={
+          <ProtectedRoute requiredPermission="users">
+              <UserDetailsByPhone />
+          </ProtectedRoute>
+        } />
+        <Route path="/forms" element={
+          <ProtectedRoute requiredPermission="forms">
+            <Forms />
+          </ProtectedRoute>
+        } />
+        <Route path="/lists" element={
+          <ProtectedRoute requiredPermission="lists">
+            <Lists />
+          </ProtectedRoute>
+        } />
+        <Route path="/lists/:id" element={
+          <ProtectedRoute requiredPermission="lists">
+            <ListsProvider>
+              <Lists2 />
+            </ListsProvider>
+          </ProtectedRoute>
+        } />
+        <Route path="/change-password" element={
+          <ProtectedRoute requiredPermission="change-password">
+            <ChangePassword />
+          </ProtectedRoute>
+        } />
+        <Route path="/registrationform" element={
+          <ProtectedRoute requiredPermission="registrationform">
+            <DataCollectionForms />
+          </ProtectedRoute>
+        } />
+        <Route path="/add-user" element={
+          <ProtectedRoute requiredPermission="add-user">
+            <AddUsers />
+          </ProtectedRoute>
+        } />
+        <Route path="/cutoff" element={
+          <ProtectedRoute requiredPermission="cutoff">
+            <CutOff />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin-settings" element={
+          <ProtectedRoute requiredPermission="admin-settings">
+            <AdminSettings />
+          </ProtectedRoute>
+        } />
+        <Route path="/landing-page" element={
+          <ProtectedRoute requiredPermission="landing-page">
+            <StaticPagesManagement />
+          </ProtectedRoute>
+        } />
+        <Route path="/premium-plans" element={
+          <ProtectedRoute requiredPermission="landing-page">
+            <PremiumPageManagement />
+          </ProtectedRoute>
+        } />
+        <Route path="/payment-logs" element={
+          <ProtectedRoute requiredPermission="payment-logs">
+            <PaymentLogs />
+          </ProtectedRoute>
+        } />
+        <Route path="/check-orders" element={
+          <ProtectedRoute requiredPermission="admin-settings">
+            <OrdersCheck />
+          </ProtectedRoute>
+        } />
+        <Route path="/appointments" element={
+          <ProtectedRoute requiredPermission="appointments">
+            <Appointments />
+          </ProtectedRoute>
+        } />
+        <Route path="/send-notifications" element={
+          <ProtectedRoute requiredPermission="appointments">
+            <SendPushNotification />
+          </ProtectedRoute>
+        } />
+    
+        {/* <Route path="/edit-user-list/:id" element={
+          <ProtectedRoute requiredPermission="edit-user-list">
+            <PaymentLogs />
+          </ProtectedRoute>
+        } /> */}
+        <Route path="/unauthorized" element={<Unauthorized />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+      </PremiumPageProvider>
+      </AnalyticsProvider>
+      </UsersProvider>
+    </BrowserRouter>
     </>
+
   );
 }
 

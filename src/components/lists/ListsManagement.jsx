@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axiosInstance from '../../utils/axios';
 import { Plus } from 'lucide-react';
 import { DndProvider } from 'react-dnd';
@@ -11,6 +11,263 @@ import BackButton from './BackButton';
 import ListFormModal from './ListFormModal';
 import LoadingSpinner from '../common/LoadingSpinner';
 
+const PREDEFINED_CATEGORIES =[
+  "AI",
+  "DEFOBCS",
+  "DEFOPENS",
+  "DEFRNT1S",
+  "DEFRNT2S",
+  "DEFRNT3S",
+  "DEFROBCS",
+  "DEFRSCS",
+  "DEFRSEBC",
+  "DEFRVJS",
+  "DEFSCS",
+  "DEFSEBCS",
+  "DEFSTS",
+  "EWS",
+  "GNT1H",
+  "GNT1O",
+  "GNT1S",
+  "GNT2H",
+  "GNT2O",
+  "GNT2S",
+  "GNT3H",
+  "GNT3O",
+  "GNT3S",
+  "GOBCH",
+  "GOBCO",
+  "GOBCS",
+  "GOPENH",
+  "GOPENO",
+  "GOPENS",
+  "GSCH",
+  "GSCO",
+  "GSCS",
+  "GSEBCH",
+  "GSEBCO",
+  "GSEBCS",
+  "GSTH",
+  "GSTO",
+  "GSTS",
+  "GVJH",
+  "GVJO",
+  "GVJS",
+  "LNT1H",
+  "LNT1O",
+  "LNT1S",
+  "LNT2H",
+  "LNT2S",
+  "LNT3H",
+  "LNT3S",
+  "LOBCH",
+  "LOBCO",
+  "LOBCS",
+  "LOPENH",
+  "LOPENO",
+  "LOPENS",
+  "LSCH",
+  "LSCO",
+  "LSCS",
+  "LSEBCH",
+  "LSEBCO",
+  "LSEBCS",
+  "LSTH",
+  "LSTO",
+  "LSTS",
+  "LVJH",
+  "LVJO",
+  "LVJS",
+  "MI",
+  "ORPHAN",
+  "PWDOBCH",
+  "PWDOBCS",
+  "PWDOPENH",
+  "PWDOPENS",
+  "PWDRNT1H",
+  "PWDRNT1S",
+  "PWDRNT2S",
+  "PWDRNT3S",
+  "PWDROBC",
+  "PWDRSCH",
+  "PWDRSCS",
+  "PWDRSEBC",
+  "PWDRSTH",
+  "PWDRSTS",
+  "PWDRVJS",
+  "PWDSCH",
+  "PWDSCS",
+  "PWDSEBCH",
+  "PWDSEBCS",
+  "PWDSTS",
+  "SDEFRNT1S",
+  "SDEFRNT2S",
+  "SDEFRNT3S",
+  "SDEFROBCS",
+  "SDEFRSCS",
+  "SDEFRSEBC",
+  "SDEFRVJS",
+  "SEWS",
+  "SORPHAN",
+  "TFWS"
+]
+
+const PREDEFINED_CITIES=[
+  "ahmednagar",
+  "akola",
+  "amravati",
+  "beed",
+  "bhandara",
+  "buldhana",
+  "chandrapur",
+  "chhatrapati sambhajinagar",
+  "dharashiv",
+  "dhule",
+  "dist",
+  "district",
+  "jalgaon",
+  "jalna",
+  "karjat",
+  "kolhapur",
+  "latur",
+  "malwadi-bota",
+  "mumbai",
+  "mumbai city",
+  "mumbai suburban",
+  "nadurbar",
+  "nagpur",
+  "nanded",
+  "nandurbar",
+  "nashik",
+  "pal",
+  "palghar",
+  "paniv",
+  "parbhani",
+  "pune",
+  "raigad",
+  "ratnagiri",
+  "sakoli",
+  "sangli",
+  "satara",
+  "shevgaon",
+  "shirpur",
+  "sindhudurg",
+  "solapur",
+  "thane",
+  "wardha",
+  "washim",
+  "yavatmal",
+  "yelur"
+]
+
+const PREDEFINED_BRANCHES =[
+  "5G",
+  "Aeronautical Engineering",
+  "Agricultural Engineering",
+  "Architectural Assistantship",
+  "Artificial Intelligence",
+  "Artificial Intelligence (AI) and Data Science",
+  "Artificial Intelligence and Data Science",
+  "Artificial Intelligence and Machine Learning",
+  "Automation and Robotics",
+  "Automobile Engineering",
+  "Bio Medical Engineering",
+  "Bio Technology",
+  "Chemical Engineering",
+  "Civil Engineering",
+  "Civil Engineering (Structural Engineering)",
+  "Civil Engineering and Planning",
+  "Civil and Environmental Engineering",
+  "Civil and infrastructure Engineering",
+  "Computer Engineering",
+  "Computer Engineering (Software Engineering)",
+  "Computer Science",
+  "Computer Science and Business Systems",
+  "Computer Science and Design",
+  "Computer Science and Engineering",
+  "Computer Science and Engineering (Artificial Intelligence and Data Science)",
+  "Computer Science and Engineering (Artificial Intelligence)",
+  "Computer Science and Engineering (Cyber Security)",
+  "Computer Science and Engineering (Internet of Things and Cyber Security Including Block Chain",
+  "Computer Science and Engineering (IoT)",
+  "Computer Science and Engineering(Artificial Intelligence and Machine Learning)",
+  "Computer Science and Engineering(Cyber Security)",
+  "Computer Science and Engineering(Data Science)",
+  "Computer Science and Information Technology",
+  "Computer Science and Technology",
+  "Computer Technology",
+  "Cyber Security",
+  "Data Engineering",
+  "Data Science",
+  "Dyestuff Technology",
+  "Electrical Engg [Electrical and Power]",
+  "Electrical Engg[Electronics and Power]",
+  "Electrical Engineering",
+  "Electrical and Computer Engineering",
+  "Electrical and Electronics Engineering",
+  "Electrical, Electronics and Power",
+  "Electronics Engineering",
+  "Electronics Engineering ( VLSI Design and Technology)",
+  "Electronics and Biomedical Engineering",
+  "Electronics and Communication (Advanced Communication Technology)",
+  "Electronics and Communication Engineering",
+  "Electronics and Communication(Advanced Communication Technology)",
+  "Electronics and Computer Engineering",
+  "Electronics and Computer Science",
+  "Electronics and Telecommunication Engg",
+  "Fashion Technology",
+  "Fibres and Textile Processing Technology",
+  "Fire Engineering",
+  "Food Engineering",
+  "Food Engineering and Technology",
+  "Food Technology",
+  "Food Technology And Management",
+  "Industrial IoT",
+  "Information Technology",
+  "Instrumentation Engineering",
+  "Instrumentation and Control Engineering",
+  "Internet of Things (IoT)",
+  "Logistics",
+  "Man Made Textile Technology",
+  "Manufacturing Science and Engineering",
+  "Mechanical & Automation Engineering",
+  "Mechanical Engineering",
+  "Mechanical Engineering Automobile",
+  "Mechanical Engineering[Sandwich]",
+  "Mechanical and Automation Engineering",
+  "Mechanical and Mechatronics Engineering (Additive Manufacturing)",
+  "Mechatronics Engineering",
+  "Metallurgy and Material Technology",
+  "Mining Engineering",
+  "Oil Fats and Waxes Technology",
+  "Oil Technology",
+  "Oil and Paints Technology",
+  "Oil,Oleochemicals and Surfactants Technology",
+  "Paints Technology",
+  "Paper and Pulp Technology",
+  "Petro Chemical Engineering",
+  "Pharmaceutical and Fine Chemical Technology",
+  "Pharmaceuticals Chemistry and Technology",
+  "Plastic Technology",
+  "Plastic and Polymer Engineering",
+  "Polymer Engineering and Technology",
+  "Printing Technology",
+  "Printing and Packing Technology",
+  "Production Engineering",
+  "Production Engineering[Sandwich]",
+  "Robotics and Artificial Intelligence",
+  "Robotics and Automation",
+  "Safety and Fire Engineering",
+  "Structural Engineering",
+  "Surface Coating Technology",
+  "Technical Textiles",
+  "Textile Chemistry",
+  "Textile Engineering / Technology",
+  "Textile Plant Engineering",
+  "Textile Technology",
+  "VLSI"
+]
+
 const ListsManagement = () => {
   const [lists, setLists] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,7 +277,8 @@ const ListsManagement = () => {
   const [formData, setFormData] = useState({
     title: '',
     items: [],
-    userIds: []
+    userIds: [],
+    category: PREDEFINED_CATEGORIES[0]
   });
   const [newItem, setNewItem] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -29,10 +287,10 @@ const ListsManagement = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [expandedListId, setExpandedListId] = useState(null);
   const [usersInList, setUsersInList] = useState({});
-  const [availableCities, setAvailableCities] = useState([]);
+  const [availableCities, setAvailableCities] = useState(PREDEFINED_CITIES.map(c => c.toLowerCase()));
   const [showCityFilter, setShowCityFilter] = useState(false);
   const [selectedCity, setSelectedCity] = useState('');
-  const [availableBranches, setAvailableBranches] = useState([]);
+  const [availableBranches, setAvailableBranches] = useState(PREDEFINED_BRANCHES);
   const [showBranchFilter, setShowBranchFilter] = useState(false);
   const [selectedBranch, setSelectedBranch] = useState('');
   const [expandedColleges, setExpandedColleges] = useState({});
@@ -40,11 +298,13 @@ const ListsManagement = () => {
   const [branchSearchInput, setBranchSearchInput] = useState('');
   const [filteredCities, setFilteredCities] = useState([]);
   const [filteredBranches, setFilteredBranches] = useState([]);
+  const searchTimeoutRef = useRef(null);
+  const [selectedCategory, setSelectedCategory] = useState(PREDEFINED_CATEGORIES[0]);
+  const [selectedTemplate, setSelectedTemplate] = useState('');
+  const [showTemplateSelection, setShowTemplateSelection] = useState(false);
 
   useEffect(() => {
     fetchLists();
-    fetchAllCities();
-    fetchAllBranches();
   }, []);
 
   const fetchLists = async () => {
@@ -86,57 +346,9 @@ const ListsManagement = () => {
     }
   };
 
-  // Function to fetch all unique cities
-  const fetchAllCities = async () => {
-    try {
-      const response = await axiosInstance.get('/api/admin/search-colleges', {
-        params: { fetchAllCities: true }
-      });
-      
-      // Extract unique cities from the response
-      if (response.data && response.data.length > 0) {
-        // Get unique cities and sort them alphabetically
-        const cities = [...new Set(response.data
-          .filter(college => college.city)
-          .map(college => college.city))]
-          .sort();
-          
-        setAvailableCities(cities);
-      }
-    } catch (err) {
-      console.error('Error fetching city list:', err);
-    }
-  };
+  
 
-  // Function to fetch all unique branches
-  const fetchAllBranches = async () => {
-    try {
-      const response = await axiosInstance.get('/api/admin/search-colleges', {
-        params: { fetchAllBranches: true }
-      });
-      
-      // Extract unique branches from the response
-      if (response.data && response.data.length > 0) {
-        // Get unique branch names from all colleges
-        let allBranches = [];
-        response.data.forEach(college => {
-          if (college.branches && Array.isArray(college.branches)) {
-            college.branches.forEach(branch => {
-              if (branch.branchName) {
-                allBranches.push(branch.branchName);
-              }
-            });
-          }
-        });
-        
-        // Filter unique branch names and sort alphabetically
-        const branches = [...new Set(allBranches)].sort();
-        setAvailableBranches(branches);
-      }
-    } catch (err) {
-      console.error('Error fetching branch list:', err);
-    }
-  };
+
 
   const handleBranchSelect = (branch) => {
     setSelectedBranch(branch);
@@ -211,12 +423,15 @@ const ListsManagement = () => {
       // Add city as an optional filter
       if (cityFilter) {
         params.city = cityFilter;
+        params.cities = [cityFilter]; // Include 'latur' as a default city
       }
       
       // Always make the API call regardless of whether we have parameters
       // This allows searching all colleges when no filters are applied
-      const response = await axiosInstance.get('/api/admin/search-colleges', { params });
-      let results = response.data;
+      const response = await axiosInstance.get('/api/colleges/search', { params });
+      
+
+      let results = response.data.colleges;
       
       // If branch filter is applied, filter colleges with matching branches on client side
       // This is because branch is a nested property that might be harder to filter on the backend
@@ -252,20 +467,36 @@ const ListsManagement = () => {
     const value = e.target.value;
     setSearchQuery(value);
     // Debounce the search to avoid too many requests
-    const timeoutId = setTimeout(() => {
-        searchColleges(value, selectedCity, selectedBranch);
-    }, 300);
-    return () => clearTimeout(timeoutId);
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    searchTimeoutRef.current = setTimeout(() => {
+      searchColleges(value, selectedCity, selectedBranch);
+    }, 1000);
   };
 
   // Modify the add college to list functionality
-  const addCollegeToList = (college, branch = null) => {
-    // Create a unique identifier for the college-branch combination
-    const uniqueId = branch 
-      ? `${college.id}_${branch.branchCode}`
-      : college.id;
-      
-    // Check if this college-branch combo is already selected
+  
+  const addCollegeToList = (college, branch = null, batchColleges = null, index = null) => {
+    if (batchColleges) {
+      // Handle batch addition
+      if (!Array.isArray(batchColleges)) {
+        console.error('batchColleges should be an array');
+        return;
+      }
+      if(index !== null && index >= 0 && index < selectedColleges.length) {
+        // If index is provided, insert at that index
+        const updatedColleges = [...selectedColleges];
+        updatedColleges.splice(index, 0, ...batchColleges);
+        setSelectedColleges(updatedColleges);
+        return;
+      }
+      setSelectedColleges(prev => [...prev, ...batchColleges]);
+      return;
+    }
+
+    // Handle single college addition (existing logic)
+    const uniqueId = branch ? `${college.id}_${branch.branchCode}` : college.id;
     if (!selectedColleges.some(c => 
       (branch && c.id === college.id && c.selectedBranchCode === branch.branchCode) ||
       (!branch && c.id === college.id && !c.selectedBranchCode)
@@ -276,7 +507,14 @@ const ListsManagement = () => {
         selectedBranch: branch ? branch.branchName : null,
         selectedBranchCode: branch ? branch.branchCode : null
       };
-      
+
+      if(index !== null && index >= 0 && index < selectedColleges.length) {
+        // If index is provided, insert at that index
+        const updatedColleges = [...selectedColleges];
+        updatedColleges.splice(index, 0, collegeToAdd);
+        setSelectedColleges(updatedColleges);
+        return;
+      }
       setSelectedColleges([...selectedColleges, collegeToAdd]);
     }
   };
@@ -293,8 +531,16 @@ const ListsManagement = () => {
     try {
       const submitData = {
         title: formData.title,
-        colleges: selectedColleges,
-        userIds: formData.userIds || []
+        colleges: selectedColleges.map(college => ({
+          ...college,
+          category: selectedCategory, // Add category to each college
+          branches: undefined, // Remove branches from the college object before sending,
+          searchIndex: undefined, // Remove searchIndex if it exists
+          additionalMetadata: undefined, // Remove additional metadata if it exists,
+          keywords: undefined,
+        })),
+        userIds: formData.userIds || [],
+        category: selectedCategory
       };
 
       if (editingList?.id) {
@@ -311,6 +557,55 @@ const ListsManagement = () => {
       setFormData({ title: '' });
       setSelectedColleges([]);
     } catch (err) {
+      console.log(err);
+      
+      setError('Failed to save list');
+    }
+  };
+
+  const  handleAppendColleges = async (listId, exportedColleges = []) => {
+   
+    try {
+      const submitData = {
+        colleges: exportedColleges,
+
+      };
+
+      if (listId) {
+        // First, fetch the current list to get its existing colleges
+  // Assuming 'lists' state variable is up-to-date or you can fetch the specific list by listId
+  const currentList = lists.find(list => list.id === listId);
+
+  let updatedColleges = [];
+
+  if (currentList && currentList.colleges) {
+    // Create a Set of existing uniqueIds for efficient lookup
+    const existingCollegeUniqueIds = new Set(currentList.colleges.map(college => college.uniqueId));
+
+    // Filter out duplicates from exportedColleges
+    const newUniqueColleges = exportedColleges.filter(college => !existingCollegeUniqueIds.has(college.uniqueId));
+
+    // Combine existing colleges with the new unique colleges
+    updatedColleges = [...currentList.colleges, ...newUniqueColleges];
+  } else {
+    // If there are no existing colleges, simply use exportedColleges
+    // Also, ensure no duplicates within exportedColleges itself if that's a possibility
+    const uniqueExportedColleges = Array.from(new Map(exportedColleges.map(college => [college.uniqueId, college])).values());
+    updatedColleges = uniqueExportedColleges;
+  }
+        submitData.colleges = updatedColleges;
+        await axiosInstance.post(`/api/admin/append-list/${listId}`, submitData);
+        setLists(lists.map(list => 
+          list.id === listId ? { ...list, colleges: submitData.colleges } : list
+        ));
+      } 
+      setShowModal(false);
+      setEditingList(null);
+      setFormData({ title: '' });
+      setSelectedColleges([]);
+    } catch (err) {
+      console.log(err);
+      
       setError('Failed to save list');
     }
   };
@@ -322,12 +617,43 @@ const ListsManagement = () => {
       });
       setSelectedColleges(list.colleges || []);
       setEditingList(list);
+      setShowTemplateSelection(false);
+      setSelectedTemplate('');
     } else {
       setFormData({ title: '' });
       setSelectedColleges([]);
       setEditingList(null);
+      setSelectedTemplate('');
+      setShowTemplateSelection(true); // Show template selection for new lists
     }
     setShowModal(true);
+  };
+
+  const handleTemplateSelect = (templateId) => {
+    if (templateId === '') {
+      // No template selected
+      setSelectedColleges([]);
+      setSelectedTemplate('');
+      setShowTemplateSelection(false);
+      return;
+    }
+
+    const templateList = lists.find(list => list.id === templateId);
+    if (templateList && templateList.colleges) {
+      setSelectedColleges([...templateList.colleges]); // Copy colleges from template
+      setSelectedTemplate(templateId);
+      setShowTemplateSelection(false);
+      // Set the category from template as well
+      if (templateList.category) {
+        setSelectedCategory(templateList.category);
+      }
+    }
+  };
+
+  const resetToTemplate = () => {
+    setShowTemplateSelection(true);
+    setSelectedTemplate('');
+    setSelectedColleges([]);
   };
 
   const moveItem = (dragIndex, hoverIndex) => {
@@ -425,7 +751,12 @@ const ListsManagement = () => {
               formData={formData}
               setFormData={setFormData}
               handleSubmit={handleSubmit}
-              closeModal={() => setShowModal(false)}
+              handleAppendColleges={handleAppendColleges}
+              closeModal={() => {
+                setShowModal(false);
+                setSelectedTemplate('');
+                setShowTemplateSelection(false);
+              }}
               selectedColleges={selectedColleges}
               setSelectedColleges={setSelectedColleges}
               searchQuery={searchQuery}
@@ -450,26 +781,57 @@ const ListsManagement = () => {
               selectedBranch={selectedBranch}
               moveCollege={moveCollege}
               removeCollegeFromList={removeCollegeFromList}
+              selectedCategory={selectedCategory}
+              setSelectedCategory={setSelectedCategory}
+              categories={PREDEFINED_CATEGORIES}
+              // Template selection props
+              showTemplateSelection={showTemplateSelection}
+              selectedTemplate={selectedTemplate}
+              availableTemplates={lists}
+              onTemplateSelect={handleTemplateSelect}
+              onResetToTemplate={resetToTemplate}
             />
           )}
 
           {/* Lists Grid */}
-          <div className="grid gap-6">
-            {lists.length > 0 ? (
-              lists.map((list) => (
-                <ListCard 
-                  key={list.id}
-                  list={list}
-                  expandedListId={expandedListId}
-                  handleListClick={handleListClick}
-                  handleEdit={handleEdit}
-                  handleDelete={handleDelete}
-                />
-              ))
-            ) : (
-              <NoListsPlaceholder openModal={openModal} />
-            )}
-          </div>
+          {expandedListId ? (
+            // Single expanded list - full width
+            <div className="w-full">
+              {lists
+                .filter(list => list.id === expandedListId)
+                .map((list) => (
+                  <ListCard 
+                    key={list.id}
+                    list={list}
+                    expandedListId={expandedListId}
+                    handleListClick={handleListClick}
+                    handleEdit={handleEdit}
+                    handleDelete={handleDelete}
+                  />
+                ))
+              }
+            </div>
+          ) : (
+            // Grid view for all lists
+            <div className="grid xl:grid-cols-2 gap-6"> {/* Changed to 2 columns on xl screens */}
+              {lists.length > 0 ? (
+                lists.map((list) => (
+                  <ListCard 
+                    key={list.id}
+                    list={list}
+                    expandedListId={expandedListId}
+                    handleListClick={handleListClick}
+                    handleEdit={handleEdit}
+                    handleDelete={handleDelete}
+                  />
+                ))
+              ) : (
+                <div className="xl:col-span-2"> {/* Full width for placeholder */}
+                  <NoListsPlaceholder openModal={openModal} />
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </DndProvider>
